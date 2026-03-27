@@ -77,12 +77,24 @@ Repeat for each phase in the plan:
 
 ### 3b. Evaluate Results
 
-After agents return, classify each result:
-- **Complete** — task done, outputs match success criteria
-- **Partial** — some work done, something remains
-- **Blocked** — agent hit a wall it cannot resolve alone
+**As each agent returns** (not after all agents finish), immediately:
 
-Update `progress.md` timeline with each result, status, and a brief summary.
+1. Classify the result:
+   - **Complete** — task done, outputs match success criteria
+   - **Partial** — some work done, something remains
+   - **Blocked** — agent hit a wall it cannot resolve alone
+
+2. **Write to `progress.md` immediately** — append a timeline entry using the progress template format:
+   ```
+   ### [ISO timestamp] - Phase: [current phase]
+   **Agent**: [agent role]
+   **Task**: [what was assigned]
+   **Status**: ✅ Complete | ⚠️ Partial | ❌ Blocked
+   **Result**: [3-5 line summary of output]
+   ```
+   Do NOT batch these updates. Write after every single agent completes.
+
+3. If the agent made any non-obvious decisions, append them to the **Decisions Log** table in `progress.md` now (don't defer this to later).
 
 ### 3c. Retry Loop
 
@@ -90,9 +102,11 @@ For **Partial** or **Blocked** results:
 
 | Attempt | Action |
 |---------|--------|
-| 1st retry | Relaunch agent with its output + note on what's incomplete |
-| 2nd retry | Relaunch with accumulated context from both prior attempts |
-| After 2 retries | Mark **Blocked** in progress.md, surface to user |
+| 1st retry | **Log retry to progress.md timeline** (status: ⟳ Retry 1), then relaunch agent with its output + note on what's incomplete |
+| 2nd retry | **Log retry to progress.md timeline** (status: ⟳ Retry 2), then relaunch with accumulated context from both prior attempts |
+| After 2 retries | Mark **Blocked** in progress.md with the full failure context, surface to user |
+
+Every retry attempt must be logged to `progress.md` **before** the agent is relaunched so the record exists even if the session is interrupted.
 
 When surfacing a blocker:
 > "Agent [role] is stuck after 2 retries on: [task].
@@ -103,22 +117,13 @@ When surfacing a blocker:
 ### 3d. Advance Phase
 
 Once all agents in a phase are **Complete** (or user has resolved blockers):
-- Update `progress.md`: mark phase complete, set **Current Phase** to next
+- **Write to `progress.md`**: mark phase complete, set **Current Phase** to the next phase name
+- **Verify the write**: re-read `progress.md` to confirm the Current Phase field updated correctly
 - One-line status to user: "✓ Phase [N] complete — [what was accomplished]"
 
 ---
 
-## Phase 4: Decisions Log
-
-Throughout execution, append to the **Decisions Log** in `progress.md`:
-- Architecture or design choices made by agents
-- Options presented to user and what they chose
-- How blockers were resolved
-- Any scope changes
-
----
-
-## Phase 5: Final Summary
+## Phase 4: Final Summary
 
 When all phases complete:
 1. Update `progress.md`: set **Current Phase** to "Complete"
@@ -144,7 +149,9 @@ If `progress.md` already exists and contains in-progress work:
 ## Orchestrator Rules
 
 - **You coordinate, agents implement** — don't write code or create files yourself (except progress.md)
+- **Write progress.md after every agent completes** — this is your single most important bookkeeping duty. Never batch updates. If a session is interrupted, the file must reflect all work done so far.
 - **Read progress.md before each phase** — agents need accurate context from prior work
+- **Log decisions inline** — when any agent reports a non-obvious choice, or the user makes a decision, append it to the Decisions Log table in progress.md immediately (architecture choices, user decisions, blocker resolutions, scope changes)
 - **Parallel by default** — agents in the same phase run simultaneously unless there's an explicit dependency
 - **Status updates are brief** — one line per phase unless the user asks for detail
 - **Respect the loop budget** — 2 retries max per agent before escalating; don't spin indefinitely

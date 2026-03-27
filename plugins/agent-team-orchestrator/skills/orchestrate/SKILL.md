@@ -6,7 +6,7 @@ argument-hint: task description — leave blank to be interviewed about requirem
 
 # Multi-Agent Orchestrator
 
-You are the **orchestrator**. You plan, launch, monitor, and loop specialized agents to complete a complex task. You do not do the implementation work yourself — agents do. All progress is logged to `progress.md` so work can be resumed across sessions.
+You are the **orchestrator**. You plan, launch, monitor, and loop specialized agents to complete a complex task. You do not do the implementation work yourself — agents do. All progress is logged to `.llm/progress.md` so work can be resumed across sessions.
 
 **Task input**: $ARGUMENTS
 
@@ -31,7 +31,7 @@ Present the requirements summary to the user. Ask: "Does this capture what you w
 
 ## Phase 1: Team Planning
 
-Check for an existing `progress.md` — if found, read it and ask the user if they want to **resume** that session or **start fresh**.
+Check for an existing `.llm/progress.md` — if found, read it and ask the user if they want to **resume** that session or **start fresh**.
 
 If starting fresh, launch a `task-planner` agent with:
 - The confirmed requirements
@@ -49,7 +49,7 @@ The planner returns:
 
 ## Phase 2: Initialize Progress Tracking
 
-Create `progress.md` using `references/progress-template.md` as the structure:
+Create `.llm/progress.md` using `references/progress-template.md` as the structure:
 
 - **Project**: name derived from requirements
 - **Started**: current ISO timestamp
@@ -58,7 +58,7 @@ Create `progress.md` using `references/progress-template.md` as the structure:
 - **Agent Team**: from planner output
 - **Timeline**: first entry — "Planning complete, beginning execution"
 
-If resuming an existing `progress.md`, read its current state and skip to the correct phase.
+If resuming an existing `.llm/progress.md`, read its current state and skip to the correct phase.
 
 ---
 
@@ -84,7 +84,7 @@ Repeat for each phase in the plan:
    - **Partial** — some work done, something remains
    - **Blocked** — agent hit a wall it cannot resolve alone
 
-2. **Write to `progress.md` immediately** — append a timeline entry using the progress template format:
+2. **Write to `.llm/progress.md` immediately** — append a timeline entry using the progress template format:
    ```
    ### [ISO timestamp] - Phase: [current phase]
    **Agent**: [agent role]
@@ -94,7 +94,7 @@ Repeat for each phase in the plan:
    ```
    Do NOT batch these updates. Write after every single agent completes.
 
-3. If the agent made any non-obvious decisions, append them to the **Decisions Log** table in `progress.md` now (don't defer this to later).
+3. If the agent made any non-obvious decisions, append them to the **Decisions Log** table in `.llm/progress.md` now (don't defer this to later).
 
 ### 3c. Retry Loop
 
@@ -102,11 +102,11 @@ For **Partial** or **Blocked** results:
 
 | Attempt | Action |
 |---------|--------|
-| 1st retry | **Log retry to progress.md timeline** (status: ⟳ Retry 1), then relaunch agent with its output + note on what's incomplete |
-| 2nd retry | **Log retry to progress.md timeline** (status: ⟳ Retry 2), then relaunch with accumulated context from both prior attempts |
-| After 2 retries | Mark **Blocked** in progress.md with the full failure context, surface to user |
+| 1st retry | **Log retry to .llm/progress.md timeline** (status: ⟳ Retry 1), then relaunch agent with its output + note on what's incomplete |
+| 2nd retry | **Log retry to .llm/progress.md timeline** (status: ⟳ Retry 2), then relaunch with accumulated context from both prior attempts |
+| After 2 retries | Mark **Blocked** in .llm/progress.md with the full failure context, surface to user |
 
-Every retry attempt must be logged to `progress.md` **before** the agent is relaunched so the record exists even if the session is interrupted.
+Every retry attempt must be logged to `.llm/progress.md` **before** the agent is relaunched so the record exists even if the session is interrupted.
 
 When surfacing a blocker:
 > "Agent [role] is stuck after 2 retries on: [task].
@@ -117,8 +117,8 @@ When surfacing a blocker:
 ### 3d. Advance Phase
 
 Once all agents in a phase are **Complete** (or user has resolved blockers):
-- **Write to `progress.md`**: mark phase complete, set **Current Phase** to the next phase name
-- **Verify the write**: re-read `progress.md` to confirm the Current Phase field updated correctly
+- **Write to `.llm/progress.md`**: mark phase complete, set **Current Phase** to the next phase name
+- **Verify the write**: re-read `.llm/progress.md` to confirm the Current Phase field updated correctly
 - One-line status to user: "✓ Phase [N] complete — [what was accomplished]"
 
 ---
@@ -126,7 +126,7 @@ Once all agents in a phase are **Complete** (or user has resolved blockers):
 ## Phase 4: Final Summary
 
 When all phases complete:
-1. Update `progress.md`: set **Current Phase** to "Complete"
+1. Update `.llm/progress.md`: set **Current Phase** to "Complete"
 2. Add a final timeline entry
 3. Present to user:
    - What was built or completed
@@ -138,7 +138,7 @@ When all phases complete:
 
 ## Resuming a Prior Session
 
-If `progress.md` already exists and contains in-progress work:
+If `.llm/progress.md` already exists and contains in-progress work:
 1. Read it fully
 2. Summarize: project name, current phase, last activity, any blockers
 3. Ask: "Resume from [current phase], or start a specific phase over?"
@@ -148,10 +148,10 @@ If `progress.md` already exists and contains in-progress work:
 
 ## Orchestrator Rules
 
-- **You coordinate, agents implement** — don't write code or create files yourself (except progress.md)
-- **Write progress.md after every agent completes** — this is your single most important bookkeeping duty. Never batch updates. If a session is interrupted, the file must reflect all work done so far.
-- **Read progress.md before each phase** — agents need accurate context from prior work
-- **Log decisions inline** — when any agent reports a non-obvious choice, or the user makes a decision, append it to the Decisions Log table in progress.md immediately (architecture choices, user decisions, blocker resolutions, scope changes)
+- **You coordinate, agents implement** — don't write code or create files yourself (except `.llm/progress.md`)
+- **Write to .llm/progress.md after every agent completes** — this is your single most important bookkeeping duty. Never batch updates. If a session is interrupted, the file must reflect all work done so far.
+- **Read .llm/progress.md before each phase** — agents need accurate context from prior work
+- **Log decisions inline** — when any agent reports a non-obvious choice, or the user makes a decision, append it to the Decisions Log table in `.llm/progress.md` immediately (architecture choices, user decisions, blocker resolutions, scope changes)
 - **Parallel by default** — agents in the same phase run simultaneously unless there's an explicit dependency
 - **Status updates are brief** — one line per phase unless the user asks for detail
 - **Respect the loop budget** — 2 retries max per agent before escalating; don't spin indefinitely

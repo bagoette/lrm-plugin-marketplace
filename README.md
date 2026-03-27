@@ -8,10 +8,12 @@ A marketplace of reusable plugins for Claude Code. Each plugin is a structured c
 
 Coordinates a team of specialized AI agents to complete complex, multi-phase tasks with cross-session progress tracking.
 
-**Skills (slash commands):**
+**Skills:**
 
-- `/orchestrate` — Runs the full pipeline: gather requirements → plan agent team → execute tasks in parallel phases → track decisions → summarize results. Automatically resumes from `progress.md` if one exists.
-- `/progress-resume` — Resume, check status, or restart a previously started orchestration.
+- `orchestrate` — Runs the full pipeline: gather requirements → plan agent team → execute tasks in parallel phases → track decisions → summarize results. Automatically resumes from `.llm/progress.md` if one exists.
+  - To use: `Use the orchestrate skill to do x...`
+- `progress-resume` — Resume, check status, or restart a previously started orchestration.
+  - To use: `Use the progress-resume skill to resume x...`
 
 **Agents:**
 

@@ -1,0 +1,6 @@
+{
+  "name": "lrm-plugin-marketplace",
+  "version": "1.0.0",
+  "description": "Loram approved marketplace plugin for Claude Code",
+  "type": "marketplace"
+}

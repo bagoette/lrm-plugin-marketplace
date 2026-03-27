@@ -1,0 +1,8 @@
+{
+  "name": "agent-team-orchestrator",
+  "description": "Generic multi-agent orchestration with progress tracking via progress.md, agent team looping with retry logic, and a requirements interview template for complex tasks",
+  "version": "1.0.0",
+  "author": {
+    "name": "bagoette"
+  }
+}

@@ -11,7 +11,7 @@
       "name": "agent-team-orchestrator",
       "source": "./plugins/agent-team-orchestrator",
       "description": "Launch and coordinate a multi-agent team to complete a complex task. Creates and maintains a progress.md file to track agent work across phases, with built-in retry/loop logic and a requirements interview if the task is unclear.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "productivity"
     }
   ]
